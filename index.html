@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Light Switch</title>
+
+  <style>
+    body {
+      background: #111;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+    }
+
+    h1 {
+      margin-top: 30px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 80px;
+      height: 40px;
+      margin-top: 30px;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #ccc;
+      border-radius: 40px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 30px;
+      width: 30px;
+      left: 5px;
+      bottom: 5px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(40px);
+    }
+
+    #bulb {
+      width: 150px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Bóng đèn</h1>
+
+  <!-- SWITCH -->
+  <label class="switch">
+    <input type="checkbox" id="toggle">
+    <span class="slider"></span>
+  </label>
+
+  <br>
+
+  <img id="bulb" src="https://www.w3schools.com/js/pic_bulboff.gif">
+
+  <p id="status">OFF</p>
+
+  <!-- HIỂN THỊ ESP32 -->
+  <p id="esp">ESP32: chưa có dữ liệu</p>
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <script>
+    // 🔥 đổi thành project của bạn
+    const firebaseConfig = {
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // SWITCH
+    const toggle = document.getElementById("toggle");
+    const bulb = document.getElementById("bulb");
+    const statusText = document.getElementById("status");
+
+    toggle.addEventListener("change", function () {
+      let state;
+
+      if (this.checked) {
+        bulb.src = "https://www.w3schools.com/js/pic_bulbon.gif";
+        statusText.innerText = "ON";
+        state = "ON";
+      } else {
+        bulb.src = "https://www.w3schools.com/js/pic_bulboff.gif";
+        statusText.innerText = "OFF";
+        state = "OFF";
+      }
+
+      // gửi trạng thái lên Firebase
+      db.ref("light").set(state);
+    });
+
+    // NHẬN dữ liệu từ ESP32
+    db.ref("esp32").on("value", (snapshot) => {
+      document.getElementById("esp").innerText =
+        "ESP32: " + snapshot.val();
+    });
+  </script>
+
+</body>
+</html>
